@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#33534A">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Montaigne">
+<title>Escritorio Montaigne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#E7E2D4;
+    --panel:#DED7C4;
+    --panel-2:#D6CEB8;
+    --ink:#20211C;
+    --ink-soft:#54544a;
+    --pine:#33534A;
+    --pine-deep:#25403A;
+    --ochre:#A97C3B;
+    --rust:#9C5B3B;
+    --line:rgba(32,33,28,.15);
+    --line-strong:rgba(32,33,28,.32);
+    --shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 10px 30px -18px rgba(32,33,28,.5);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"EB Garamond",Georgia,serif;
+    font-size:18px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px;}
+
+  /* header */
+  header.top{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+    padding-bottom:18px;margin-bottom:40px;
+  }
+  .brand{font-family:"Fraunces",serif;font-weight:500;font-size:1.35rem;letter-spacing:.2px;}
+  .brand span{color:var(--pine);}
+  .motto{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
+
+  /* ---------- mode select ---------- */
+  .hero{margin-bottom:44px;max-width:760px;}
+  .hero .eyebrow{
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ochre);margin-bottom:18px;
+  }
+  .hero h1{
+    font-family:"Fraunces",serif;font-weight:400;
+    font-size:clamp(2.2rem,6vw,3.6rem);line-height:1.02;
+    margin:0 0 20px;letter-spacing:-.5px;
+  }
+  .hero h1 em{font-style:italic;color:var(--pine);}
+  .hero p{font-size:1.18rem;color:var(--ink-soft);max-width:56ch;margin:0;}
+
+  .section-label{
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-soft);
+    display:flex;align-items:center;gap:14px;margin:0 0 22px;
+  }
+  .section-label::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media(max-width:820px){.modes{grid-template-columns:1fr;}}
+
+  .mode-card{
+    position:relative;text-align:left;cursor:pointer;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:3px;padding:26px 22px 22px;
+    font-family:inherit;color:inherit;
+    display:flex;flex-direction:column;gap:0;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    overflow:hidden;
+  }
+  /* strata edge on each card */
+  .mode-card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:6px;
+    background:
+      linear-gradient(var(--pine-deep),var(--pine-deep)) 0 0/100% 33.3% no-repeat,
+      linear-gradient(var(--pine),var(--pine)) 0 50%/100% 33.3% no-repeat,
+      linear-gradient(var(--ochre),var(--ochre)) 0 100%/100% 33.3% no-repeat;
+    opacity:.55;transition:opacity .18s ease;
+  }
+  .mode-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--line-strong);}
+  .mode-card:hover::before{opacity:1;}
+  .mode-card:focus-visible{outline:2px solid var(--pine);outline-offset:3px;}
+  .mode-tag{
+    align-self:flex-start;font-family:"IBM Plex Mono",monospace;font-size:.62rem;
+    letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ochre);border:1px solid var(--ochre);border-radius:2px;
+    padding:3px 7px;margin-bottom:16px;
+  }
+  .mode-num{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-soft);letter-spacing:.1em;margin-bottom:8px;}
+  .mode-card h3{font-family:"Fraunces",serif;font-weight:500;font-size:1.5rem;margin:0 0 4px;line-height:1.1;}
+  .mode-sub{font-style:italic;color:var(--pine);margin-bottom:14px;font-size:1.02rem;}
+  .mode-blurb{color:var(--ink-soft);font-size:1rem;flex:1;margin-bottom:18px;}
+  .mode-meta{display:flex;justify-content:space-between;align-items:center;
+    font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.08em;
+    color:var(--ink-soft);border-top:1px solid var(--line);padding-top:12px;}
+  .diff{display:inline-flex;gap:3px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--line-strong);}
+  .dot.on{background:var(--pine);}
+  .go{color:var(--pine);}
+
+  /* ---------- writer ---------- */
+  .writer{display:grid;grid-template-columns:230px 1fr;gap:40px;align-items:start;}
+  @media(max-width:820px){.writer{grid-template-columns:1fr;gap:22px;}}
+
+  .rail{position:sticky;top:24px;}
+  @media(max-width:820px){.rail{position:static;}}
+  .rail .back{
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-soft);background:none;border:none;
+    cursor:pointer;padding:0 0 18px;display:inline-flex;align-items:center;gap:7px;
+  }
+  .rail .back:hover{color:var(--pine);}
+  .rail-title{font-family:"Fraunces",serif;font-size:1.15rem;margin:0 0 3px;font-weight:500;}
+  .rail-sub{font-style:italic;color:var(--pine);font-size:.92rem;margin-bottom:20px;}
+
+  .strata{display:flex;flex-direction:column;gap:4px;list-style:none;padding:0;margin:0;}
+  @media(max-width:820px){
+    .strata{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:6px;}
+  }
+  .layer{
+    display:flex;align-items:center;gap:10px;cursor:pointer;
+    padding:9px 11px;border:1px solid var(--line);border-left:3px solid transparent;
+    background:var(--panel);border-radius:2px;font-size:.9rem;color:var(--ink-soft);
+    transition:background .15s ease,border-color .15s ease,color .15s ease;
+    white-space:nowrap;
+  }
+  .layer:hover{background:var(--panel-2);}
+  .layer .lnum{font-family:"IBM Plex Mono",monospace;font-size:.66rem;color:var(--ink-soft);}
+  .layer.done{border-left-color:var(--pine);color:var(--ink);}
+  .layer.done .lnum{color:var(--pine);}
+  .layer.active{border-left-color:var(--ochre);background:var(--panel-2);color:var(--ink);box-shadow:var(--shadow);}
+  .layer.active .lnum{color:var(--ochre);}
+  .layer .check{margin-left:auto;color:var(--pine);opacity:0;font-size:.8rem;}
+  .layer.done .check{opacity:1;}
+  @media(max-width:820px){.layer .lname{display:none;}.layer .check{display:none;}}
+
+  /* step card */
+  .step-card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+    padding:34px 36px 30px;box-shadow:var(--shadow);}
+  @media(max-width:560px){.step-card{padding:24px 20px;}}
+  .step-eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ochre);margin-bottom:14px;}
+  .step-card h2{font-family:"Fraunces",serif;font-weight:500;font-size:clamp(1.5rem,3.5vw,2rem);
+    line-height:1.12;margin:0 0 16px;letter-spacing:-.3px;}
+  .guide{color:var(--ink-soft);font-size:1.08rem;margin:0 0 20px;max-width:60ch;}
+
+  .example{border-left:3px solid var(--ochre);background:rgba(169,124,59,.07);
+    padding:14px 18px;margin:0 0 24px;border-radius:0 2px 2px 0;}
+  .example.alt{border-left-color:var(--pine);background:rgba(51,83,74,.07);}
+  .example.alt .ex-label{color:var(--pine);}
+  .example .ex-label{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ochre);margin-bottom:6px;}
+  .example .ex-text{font-style:italic;color:var(--ink);font-size:1.02rem;line-height:1.5;}
+
+  textarea,input.topic{
+    width:100%;font-family:"EB Garamond",Georgia,serif;color:var(--ink);
+    background:var(--paper);border:1px solid var(--line-strong);border-radius:2px;
+    padding:16px 18px;font-size:1.14rem;line-height:1.7;resize:vertical;
+  }
+  textarea{min-height:200px;}
+  input.topic{font-size:1.3rem;font-family:"Fraunces",serif;}
+  textarea:focus,input.topic:focus{outline:2px solid var(--pine);outline-offset:1px;border-color:var(--pine);}
+  textarea::placeholder,input.topic::placeholder{color:rgba(84,84,74,.5);font-style:italic;}
+
+  .save-note{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;
+    color:var(--ink-soft);margin-top:10px;height:1em;opacity:0;transition:opacity .3s ease;}
+  .save-note.show{opacity:.75;}
+
+  .nav{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:26px;}
+  button.btn{font-family:"IBM Plex Mono",monospace;font-size:.76rem;letter-spacing:.1em;
+    text-transform:uppercase;cursor:pointer;border-radius:2px;padding:13px 22px;
+    border:1px solid var(--pine);background:var(--pine);color:var(--paper);
+    transition:background .15s ease,transform .1s ease;}
+  button.btn:hover{background:var(--pine-deep);}
+  button.btn:active{transform:translateY(1px);}
+  button.btn.ghost{background:none;color:var(--pine);}
+  button.btn.ghost:hover{background:rgba(51,83,74,.08);}
+  button.btn:disabled{opacity:.35;cursor:not-allowed;}
+  button.btn:focus-visible{outline:2px solid var(--ochre);outline-offset:2px;}
+
+  /* ---------- assembled ---------- */
+  .assembled h2.draft-title{font-family:"Fraunces",serif;font-weight:400;font-size:clamp(1.8rem,5vw,2.8rem);
+    margin:0 0 6px;letter-spacing:-.4px;}
+  .draft-kicker{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ochre);margin-bottom:10px;}
+  .draft-body{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+    padding:40px 46px;box-shadow:var(--shadow);margin:26px 0;position:relative;}
+  @media(max-width:560px){.draft-body{padding:26px 22px;}}
+  .draft-body::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:repeating-linear-gradient(var(--pine),var(--pine) 8px,var(--ochre) 8px,var(--ochre) 10px,var(--pine-deep) 10px,var(--pine-deep) 18px);
+    opacity:.5;border-radius:3px 0 0 3px;}
+  .draft-body p{font-size:1.2rem;line-height:1.72;margin:0 0 1.1em;}
+  .draft-body p:last-child{margin-bottom:0;}
+  .draft-body .empty-line{color:rgba(84,84,74,.5);font-style:italic;}
+
+  .checklist{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:26px 28px;margin:26px 0;}
+  .checklist h3{font-family:"Fraunces",serif;font-weight:500;margin:0 0 16px;font-size:1.3rem;}
+  .checklist ul{list-style:none;margin:0;padding:0;display:grid;gap:11px;}
+  .checklist li{display:flex;gap:12px;align-items:flex-start;font-size:1.04rem;color:var(--ink);cursor:pointer;}
+  .checklist .box{flex:0 0 auto;width:20px;height:20px;border:1.5px solid var(--pine);border-radius:2px;margin-top:2px;
+    display:flex;align-items:center;justify-content:center;color:var(--paper);font-size:.8rem;transition:background .12s ease;}
+  .checklist li.checked .box{background:var(--pine);}
+  .checklist li.checked span{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--line-strong);}
+
+  .assembled-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;}
+
+  .import-row{margin-top:36px;padding-top:22px;border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .import-row .import-label{font-family:"IBM Plex Mono",monospace;font-size:.72rem;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);}
+
+  footer.foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);
+    font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;color:var(--ink-soft);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+  .hidden{display:none !important;}
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Escritorio <span>Montaigne</span></div>
+    <div class="motto">Que sais-je&nbsp;?</div>
+  </header>
+
+  <!-- ============ VIEW: MODE SELECT ============ -->
+  <main id="view-select">
+    <div class="hero">
+      <div class="eyebrow">Un taller para escribir ensayos</div>
+      <h1>Un ensayo es un <em>peso</em>, no una prueba.</h1>
+      <p>Montaigne no explicaba temas: los sopesaba, pensando en voz alta a partir de casos concretos. Elige una de sus tres formas y este taller te lleva capa por capa hasta tener un borrador tuyo.</p>
+    </div>
+
+    <div class="section-label">Elige tu forma</div>
+    <div class="modes" id="mode-list"></div>
+
+    <div class="import-row">
+      <span class="import-label">¿Ya tienes un borrador descargado?</span>
+      <button class="btn ghost" id="btn-import" type="button">Importar un ensayo (.md)</button>
+      <input type="file" id="file-import" accept=".md,text/markdown,text/plain" class="hidden">
+    </div>
+  </main>
+
+  <!-- ============ VIEW: WRITER ============ -->
+  <main id="view-writer" class="hidden">
+    <div class="writer">
+      <aside class="rail">
+        <button class="back" id="btn-exit-writer" type="button">← Cambiar de forma</button>
+        <div class="rail-title" id="rail-title"></div>
+        <div class="rail-sub" id="rail-sub"></div>
+        <ul class="strata" id="strata"></ul>
+      </aside>
+
+      <section>
+        <div class="step-card">
+          <div class="step-eyebrow" id="step-eyebrow"></div>
+          <h2 id="step-title"></h2>
+          <p class="guide" id="step-guide"></p>
+          <div class="example hidden" id="step-example">
+            <div class="ex-label" id="step-example-label">Cómo lo haría Montaigne</div>
+            <div class="ex-text" id="step-example-text"></div>
+          </div>
+          <div class="example alt hidden" id="step-example2">
+            <div class="ex-label" id="step-example2-label"></div>
+            <div class="ex-text" id="step-example2-text"></div>
+          </div>
+          <div id="input-holder"></div>
+          <div class="save-note" id="save-note">Guardado</div>
+
+          <div class="nav">
+            <button class="btn ghost" id="btn-prev" type="button">← Capa anterior</button>
+            <button class="btn" id="btn-next" type="button">Siguiente capa →</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============ VIEW: ASSEMBLED ============ -->
+  <main id="view-draft" class="hidden assembled">
+    <button class="back mono" id="btn-back-edit" type="button" style="background:none;border:none;cursor:pointer;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;font-size:.7rem;margin-bottom:20px;">← Volver a editar</button>
+    <div class="draft-kicker" id="draft-kicker"></div>
+    <h2 class="draft-title" id="draft-title"></h2>
+    <div class="draft-body" id="draft-body"></div>
+
+    <div class="checklist">
+      <h3>Antes de dar por hecho el ensayo</h3>
+      <ul id="checklist-list"></ul>
+    </div>
+
+    <div class="assembled-actions">
+      <button class="btn" id="btn-copy" type="button">Copiar borrador</button>
+      <button class="btn ghost" id="btn-download" type="button">Descargar .md</button>
+      <button class="btn ghost" id="btn-new" type="button">Empezar otro</button>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>Basado en la estructura real de los Ensayos · Libros I, II y III</span>
+    <span>Tu texto se guarda solo en este dispositivo</span>
+  </footer>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const MODES = {
+  breve: {
+    name:"Modo Breve",
+    sub:"La cadena de ejemplos",
+    book:"Libro I",
+    tag:"Recomendado para empezar",
+    diff:1,
+    blurb:"Cuenta historias concretas y deja que la idea aparezca sola. La forma más fácil.",
+    steps:[
+      {id:"tema",kind:"input",eyebrow:"Capa 1 / Tema",lname:"Tema",
+        title:"Elige una cosa humana concreta",
+        guide:"No una idea abstracta como \u201cla valent\u00eda\u201d, sino algo que le pasa a la gente y puedas ver. El tema de \u201cPor diversos caminos se llega a semejante fin\u201d es exactamente as\u00ed de concreto: qu\u00e9 ablanda a alguien que te tiene a su merced.",
+        placeholder:"Ej.: qu\u00e9 hace que alguien perdone"},
+      {id:"entrada",kind:"textarea",eyebrow:"Capa 2 / Entrada",lname:"Entrada",
+        title:"Entra directo, sin introducci\u00f3n",
+        guide:"Nada de \u201cdesde tiempos inmemoriales\u201d. La primera l\u00ednea ya est\u00e1 dentro del asunto. Montaigne abre nombrando lo que todos dan por hecho y, en la frase siguiente, lo contradice \u2014 y esa contradicci\u00f3n es todo el ensayo.",
+        example:"La manera m\u00e1s com\u00fan de ablandar el coraz\u00f3n de aquellos a quienes hemos ofendido, cuando ya nos tienen a su merced con la venganza a la mano, es moverlos a conmiseraci\u00f3n y piedad con nuestra sumisi\u00f3n. Y sin embargo, medios exactamente contrarios \u2014el valor y la firmeza\u2014 han servido a veces para producir el mismo efecto.",
+        placeholder:"Tu primera l\u00ednea, directa al tema\u2026"},
+      {id:"h1",kind:"textarea",eyebrow:"Capa 3 / Cuenta una historia",lname:"Historia 1",
+        title:"Cuenta una historia, con protagonista y desenlace",
+        guide:"No importa si es antigua o de ayer, tuya o ajena: importa que sea una historia concreta, con nombre, situaci\u00f3n y final. Que ilustre tu idea sin explicarla. (Si consigues emparejar una lejana con una actual, mejor a\u00fan \u2014 Montaigne lo hace en otros ensayos \u2014 pero no es obligatorio.)",
+        example:"Eduardo, Pr\u00edncipe de Gales, tom\u00f3 por la fuerza la ciudad de Limoges. Los llantos de los habitantes, las mujeres y los ni\u00f1os arroj\u00e1ndose a sus pies no lo detuvieron. Pero al internarse en la ciudad vio a tres nobles franceses que, solos, resist\u00edan con incre\u00edble bravura el empuje de su ej\u00e9rcito. El respeto ante ese valor le quit\u00f3 el filo a la ira: empezando por esos tres, perdon\u00f3 a toda la ciudad.",
+        placeholder:"Una historia con protagonista y desenlace\u2026"},
+      {id:"h2",kind:"textarea",eyebrow:"Capa 4 / Escala o contradice",lname:"Historia 2",
+        title:"Otra historia que escale \u2014 o que te contradiga",
+        guide:"Este es el motor del Libro I: cada historia nueva tiene que empujar m\u00e1s lejos, no repetir. Puede reforzar (un caso m\u00e1s extremo del mismo patr\u00f3n) o contradecir abiertamente lo anterior. Montaigne hace lo segundo, y lo anuncia: \u201cY, directamente contra mis primeros ejemplos\u2026\u201d. Contradecirte no rompe el ensayo: lo abre.",
+        example:"Y, directamente contra mis primeros ejemplos: Alejandro, el m\u00e1s firme de los hombres, tom\u00f3 Gaza y hall\u00f3 a Betis, su comandante, solo, sin armas, cubierto de sangre, peleando a\u00fan. Le prometi\u00f3 todos los tormentos. Betis no respondi\u00f3 palabra. \u201cSi no puedo arrancarte una palabra, te arrancar\u00e9 al menos un gemido\u201d \u2014 y lo hizo arrastrar vivo detr\u00e1s de un carro hasta desmembrarlo. El mismo valor que ablandaba a otros, en \u00e9l encendi\u00f3 la furia.",
+        placeholder:"Una historia que escale o contradiga a la anterior\u2026"},
+      {id:"conexion",kind:"textarea",eyebrow:"Capa 5 / Conexi\u00f3n",lname:"Conexi\u00f3n",
+        title:"Deja que un caso reinterprete al otro",
+        guide:"Aqu\u00ed vive tu an\u00e1lisis, y cabe en una o dos frases: qu\u00e9 se ve al poner las historias lado a lado. Ojo: la conclusi\u00f3n de Montaigne no resuelve la contradicci\u00f3n, la acepta. Puedes tambi\u00e9n meterte t\u00fa como un caso m\u00e1s \u2014 \u00e9l lo hace: \u201cambos medios me habr\u00edan conmovido f\u00e1cilmente, pues tengo una debilidad enorme hacia la clemencia\u201d.",
+        example:"El hombre es, en verdad, un objeto asombrosamente vano, diverso y ondulante. Es dif\u00edcil fundar sobre \u00e9l un juicio firme y uniforme.",
+        placeholder:"\u00bfQu\u00e9 se ve al poner las historias lado a lado?\u2026"},
+      {id:"cierre",kind:"textarea",eyebrow:"Capa 6 / Cierre",lname:"Cierre",
+        title:"Corta en seco, sin moraleja",
+        guide:"Nada de resumir ni de cerrar con lecci\u00f3n. Montaigne termina este ensayo con la escena m\u00e1s dura de todas \u2014 la matanza de Tebas \u2014 y la deja ah\u00ed, sin comentario, rematando en un dato fr\u00edo. La imagen final hace el trabajo que har\u00eda la conclusi\u00f3n.",
+        example:"En Tebas murieron seis mil hombres; a ninguno se le vio huir ni pedir clemencia: buscaban por las calles al enemigo para provocarlo a darles una muerte honrosa. Su valor afligido no despert\u00f3 ninguna piedad. La matanza dur\u00f3 hasta la \u00faltima gota de sangre, y solo se perdon\u00f3 a los desarmados \u2014 ancianos, mujeres y ni\u00f1os \u2014 de los que se sacaron treinta mil esclavos.",
+        placeholder:"Una imagen o un dato final, sin moraleja\u2026"}
+    ],
+    checklist:[
+      "Entr\u00e9 directo, sin introducci\u00f3n de relleno",
+      "El tema es concreto y humano, no abstracto",
+      "Tengo 2 historias con protagonista y desenlace (m\u00e1s las opcionales)",
+      "Cada historia escala: refuerza o contradice a la anterior, no la repite",
+      "Si me contradije, lo dej\u00e9 a la vista en vez de esconderlo",
+      "Mi an\u00e1lisis est\u00e1 en la conexi\u00f3n entre historias, no en un p\u00e1rrafo de teor\u00eda",
+      "Cort\u00e9 en seco, sin moraleja ni resumen"
+    ]
+  },
+
+  argumento: {
+    name:"Modo Argumento",
+    sub:"El argumento que se rompe",
+    book:"Libro II",
+    tag:"",
+    diff:2,
+    blurb:"Defiende una idea, ponla a prueba y déjala romperse en vivo. La marca del Libro II.",
+    steps:[
+      {id:"distincion",kind:"input",eyebrow:"Capa 1 / Distinción",lname:"Distinción",
+        title:"Empieza con una distinción: X no es Y",
+        guide:"Montaigne abre separando dos cosas que parecen iguales. “La bondad no es la virtud.” “Juzgar un acto no es juzgar a un hombre.” Escribe la tuya.",
+        placeholder:"Ej.: estar ocupado no es lo mismo que ser útil"},
+      {id:"apertura",kind:"textarea",eyebrow:"Capa 2 / Apertura",lname:"Apertura",
+        title:"Plantea la distinción en serio",
+        guide:"Nada de historia ni de “yo” todavía. Enuncia el problema con claridad, como si lo defendieras.",
+        example:"La virtud es algo más noble que las buenas inclinaciones con que nacemos. Quien perdona por temperamento suave hace algo bello; quien perdona dominando su furia, hace mucho más.",
+        placeholder:"Enuncia y defiende tu distinción…"},
+      {id:"construccion",kind:"textarea",eyebrow:"Capa 3 / Construcción",lname:"Construcción",
+        title:"Apoya tu tesis con 2 a 4 ejemplos, no con argumentos",
+        guide:"Un ejemplo es un caso concreto —un nombre, una situación, un desenlace— no una explicación lógica. “Metelo arriesgó la muerte ante una ley injusta” es un ejemplo; “la virtud exige dificultad porque sin mérito no hay…” es un argumento, y eso va después. Aquí van 2 a 4, comprimidos a una frase cada uno, apilados sin explicar. Los explicas en la capa siguiente.",
+        example:"Metelo se enfrentó solo a una ley injusta arriesgando la muerte. Catón se abrió las entrañas antes que ver la cara de un tirano. Sócrates aguantó a su mujer difícil para ejercitar la paciencia.",
+        placeholder:"2 a 4 ejemplos concretos, una frase cada uno…"},
+      {id:"bisagra",kind:"textarea",eyebrow:"Capa 4 / La bisagra",lname:"La bisagra",
+        title:"Rompe tu propio argumento, en voz alta",
+        guide:"El movimiento clave del Libro II. Busca un caso que contradiga los ejemplos de la Capa 3 —uno que tu tesis no logre explicar— y nómbralo con un giro visible: “He llegado hasta aquí fácil, pero ahora se me ocurre que…”. No lo escondas ni pivotees en silencio: el lector tiene que ver que tu propia idea se tambaleó.",
+        example:"Pero se me ocurre que Sócrates, la mejor alma que conozco, no encaja: en él no veo lucha alguna. Si la virtud exige combate, ¿la suya vale menos?",
+        placeholder:"El caso que contradice lo anterior, dicho con un giro visible…"},
+      {id:"reconstruccion",kind:"textarea",eyebrow:"Capa 5 / Reconstrucción",lname:"Reconstrucción",
+        title:"Tu tesis no estaba mal: estaba incompleta",
+        guide:"El caso rebelde no tumba tu idea \u2014 muestra que describ\u00eda solo una parte de algo m\u00e1s grande. Para encontrar ese algo m\u00e1s grande, hazte tres preguntas, en orden. (1) \u00bfQu\u00e9 tienen EN COM\u00daN el caso rebelde y tus ejemplos del principio? Eso es la categor\u00eda grande. (2) \u00bfEn qu\u00e9 SE DIFERENCIAN? Esa diferencia es lo que la parte en pedazos. (3) N\u00f3mbrala y escr\u00edbela: tu tesis original pasa a ser uno de los pedazos, no toda la verdad. Abajo, las dos formas en que suele salir.",
+        exampleLabel:"Forma 1 \u00b7 por grados \u2014 as\u00ed lo resuelve Montaigne",
+        noQuote:true,
+        example:"Mi tesis era: virtud es vencer el deseo con esfuerzo. S\u00f3crates no encaja, porque en \u00e9l no hay lucha. \u00bfQu\u00e9 comparten S\u00f3crates y mis ejemplos? Que todos obran bien. \u00bfEn qu\u00e9 se diferencian? En cu\u00e1nto les cuesta hacerlo. Entonces no hay una virtud, hay tres grados: la inocencia que nunca fue tentada, la virtud que vence al deseo con esfuerzo, y la virtud que ya se volvi\u00f3 naturaleza y no necesita pelear. Mi tesis describ\u00eda solo el grado de en medio.",
+        example2Label:"Forma 2 \u00b7 por eje \u2014 la divisi\u00f3n estaba en otro lado",
+        noQuote2:true,
+        example2:"Mi tesis era: el cine fija la imagen y la literatura la deja abierta. Caso rebelde: el primer plano de De Niro en Taxi Driver deja el hueco tan abierto como un verso. \u00bfQu\u00e9 comparten el cine y la literatura? Que los dos pueden dejar hueco o taparlo. Entonces el eje verdadero no era cine contra literatura: era abierto contra literal, y ese corte atraviesa los dos medios por igual.",
+        placeholder:"Nombra la categoría grande y sus pedazos; tu tesis es uno de ellos…"},
+      {id:"yocaso",kind:"textarea",eyebrow:"Capa 6 / Tú como caso",lname:"Tú como caso",
+        title:"Métete tú en la idea que acabas de reconstruir",
+        guide:"Con la idea ampliada de la Capa 5 ya en mano: ¿de qué lado caes tú, el fuerte o el flojo? Respóndelo con un momento tuyo real, no con una etiqueta —“la vez que hice X”, no “soy de los buenos”. Y si dudas entre dos lados, elige el menos favorecedor: rebajarte a ti mismo es lo que te da autoridad para juzgar a los demás.",
+        example:"En cuanto a mí, apenas llego al primer grado. Cuando no reacciono mal casi nunca es por dominio: es que la tentación no me tocó fuerte. Mi virtud es más suerte que mérito.",
+        placeholder:"Un momento tuyo real, y del lado menos favorecedor…"},
+      {id:"cierre",kind:"textarea",eyebrow:"Capa 7 / Cierre",lname:"Cierre",
+        title:"Cierra sin resumir — elige una de tres salidas",
+        guide:"El error fácil aquí es rematar con un resumen o una moraleja (“en definitiva, todo esto demuestra que…”). Evítalo eligiendo UNA salida: (1) Disolverte — te vas del tema hacia algo más grande y ya no regresas: Montaigne, hablando de crueldad, termina pidiendo respeto por los animales y hasta las plantas. (2) Desdecirte — dudas en voz alta de si valía la pena escribir todo esto. (3) Material crudo — en vez de concluir, pegas algo sin pulir: una nota, una lista, un fragmento; Montaigne cierra “Sobre los libros” copiando las anotaciones a mano de sus propias lecturas.",
+        example:"Salida 1, la de Montaigne en “Sobre la crueldad”: tras páginas sobre la crueldad entre hombres, sale del tema hacia todas las criaturas — “hay un cierto respeto que nos liga no solo a las bestias, que tienen vida y sentimiento, sino aun a los árboles y a las plantas. A los hombres les debemos justicia; a las demás criaturas, gentileza” — y ahí lo deja, sin volver.",
+        placeholder:"Una de tres: disuélvete, desdícete, o pega algo crudo…"}
+    ],
+    checklist:[
+      "Abrí con una distinción clara (X no es Y)",
+      "La construí en serio antes de tocarla",
+      "Encontré el caso que mi tesis no explica y lo dije",
+      "Mi idea ampliada explica el caso rebelde Y los ejemplos del principio",
+      "Me puse a mí mismo como caso, con un momento real y en lugar humilde",
+      "El cierre NO es un resumen: se disuelve, se desdice o muestra material crudo"
+    ]
+  },
+
+  libre: {
+    name:"Modo Libre",
+    sub:"El ensayo por asociación",
+    book:"Libro III",
+    tag:"",
+    diff:3,
+    blurb:"El título es solo un pretexto. Avanza saltando de idea en idea y vuelve al final. El Libro III.",
+    steps:[
+      {id:"objeto",kind:"input",eyebrow:"Capa 1 / Título-pretexto",lname:"Título",
+        title:"Elige un título pequeño: un objeto o un concepto menor",
+        guide:"Montaigne usa las dos cosas: un objeto concreto (“De los carruajes”) o un concepto acotado (“Del arrepentirse”, “De la diversión”). Lo que no usa: temas grandiosos (“la civilización”, “el sentido de la vida”). El título es una puerta pequeña — el sentido grande se carga después.",
+        placeholder:"Ej.: una llave que ya no abre nada · el desorden · pedir perdón"},
+      {id:"abre",kind:"textarea",eyebrow:"Capa 2 / Abre contigo",lname:"Abre contigo",
+        title:"Empieza por ti, no por el objeto",
+        guide:"Una anécdota tuya o una declaración de qué estás haciendo al escribir. El objeto del título puede tardar en aparecer.",
+        example:"Otros forman al hombre; yo doy cuenta de uno solo, muy mal formado. No pinto el ser: pinto el devenir.",
+        placeholder:"Arranca contigo, no con el objeto…"},
+      {id:"salto1",kind:"textarea",eyebrow:"Capa 3 / Primer salto",lname:"Primer salto",
+        title:"Salta a una idea vecina",
+        guide:"Conecta con lo anterior por una sola palabra o imagen compartida, no por un plan. Deja que el pensamiento derive.",
+        placeholder:"Una idea que nace de la anterior por asociación…"},
+      {id:"salto2",kind:"textarea",eyebrow:"Capa 4 / Sigue saltando",lname:"Sigue saltando",
+        title:"Encadena dos o tres asociaciones más",
+        guide:"Cada bloque comparte algo con el anterior. En “De los carruajes”, Montaigne va de estornudos a mareos a carruajes a la conquista de América — todo por asociación.",
+        placeholder:"Sigue la cadena de saltos…"},
+      {id:"centro",kind:"textarea",eyebrow:"Capa 5 / El centro oculto",lname:"Centro oculto",
+        title:"Ahora entra el tema grande de verdad",
+        guide:"Pasada la mitad, aparece el asunto serio que el título disfrazaba. El objeto pequeño era la puerta. Un ancla que Montaigne usa aquí: un caso de gente común y actual, contado con detalle inusual — en “Del arrepentirse”, un campesino ladrón que en su vejez compensa a cada una de sus víctimas. La filosofía se sostiene, dice, en “una vida común y privada”.",
+        example:"De los carruajes de lujo, Montaigne llega sin avisar a la crueldad de la conquista del Nuevo Mundo. Ese era el tema real.",
+        placeholder:"El tema serio que el título escondía…"},
+      {id:"intimo",kind:"textarea",eyebrow:"Capa 6 / Lo más íntimo",lname:"Lo más íntimo",
+        title:"Coloca aquí tu material más vulnerable",
+        guide:"Lo más expuesto no va al inicio ni al final: va en el punto más hondo. Tu miedo, tu pérdida, tu vergüenza.",
+        placeholder:"Lo que menos querrías poner al principio…"},
+      {id:"desvio",kind:"textarea",eyebrow:"Capa 7 / Señala el desvío",lname:"Señala el desvío",
+        title:"Reconoce en voz alta que te fuiste por las ramas",
+        guide:"No borres la digresión: úsala de bisagra. “Pero volvamos a nuestros carruajes.” El desvío señalado es método, no error.",
+        placeholder:"“Pero volvamos a…” — reconoce el desvío…"},
+      {id:"bucle",kind:"textarea",eyebrow:"Capa 8 / Salida final",lname:"Salida final",
+        title:"Cierra en bucle — o proyectándote",
+        guide:"Dos salidas reales. (1) El bucle: vuelve al título del principio, pero cargado con todo lo que pasó — una imagen que condense sin explicar. (2) La proyección: cierra mirando hacia adelante, hacia lo que viene de ti — así termina “Del arrepentirse”: “quisiera que la gente sepa desde dónde habré declinado”. El bucle es más potente; la proyección, más natural si tu título era un concepto.",
+        example:"El bucle de “De los carruajes”: el ensayo termina con el rey de Perú llevado en hombros — el anti-carruaje — y derribado por un jinete español. La imagen dice la tesis sin enunciarla.",
+        placeholder:"Vuelve al título transformado, o proyecta hacia adelante…"}
+    ],
+    checklist:[
+      "El título es pequeño: un objeto o concepto menor, no un tema grandioso",
+      "Abrí por mí, no por el título",
+      "Avancé por asociación, sin plan previo",
+      "El tema grande entró pasada la mitad",
+      "Puse lo más íntimo en el punto más hondo",
+      "Señalé mis desvíos en vez de borrarlos",
+      "Cerré en bucle transformado o proyectándome — no resumiendo"
+    ]
+  }
+};
+
+/* ---------------- STATE ---------------- */
+let state = { mode:null, step:0, values:{}, checks:{} };
+let saveTimer=null, noteTimer=null;
+
+/* ---------------- STORAGE (standalone: localStorage) ---------------- */
+const STORE_KEY = "montaigne:draft:v1";
+async function persist(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){/* private mode: in-memory only */}
+}
+async function restore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      const s = JSON.parse(raw);
+      if(s && s.mode && MODES[s.mode]){ state = Object.assign({values:{},checks:{},step:0}, s); return true; }
+    }
+  }catch(e){/* ignore */}
+  return false;
+}
+async function wipe(){
+  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+}
+
+/* ---------------- HELPERS ---------------- */
+const $ = id => document.getElementById(id);
+function show(view){
+  ["view-select","view-writer","view-draft"].forEach(v=>$(v).classList.add("hidden"));
+  $(view).classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"instant"in window? "instant":"auto"});
+}
+function flashSaved(){
+  $("save-note").classList.add("show");
+  clearTimeout(noteTimer);
+  noteTimer=setTimeout(()=>$("save-note").classList.remove("show"),1400);
+}
+
+/* ---------------- MODE SELECT ---------------- */
+function renderModes(){
+  const list = $("mode-list");
+  list.innerHTML="";
+  Object.entries(MODES).forEach(([key,m],i)=>{
+    const card=document.createElement("button");
+    card.className="mode-card";
+    card.type="button";
+    const dots=[1,2,3].map(n=>`<span class="dot ${n<=m.diff?'on':''}"></span>`).join("");
+    card.innerHTML=`
+      ${m.tag?`<span class="mode-tag">${m.tag}</span>`:``}
+      <div class="mode-num">${m.book} · ${String(i+1).padStart(2,"0")}</div>
+      <h3>${m.name}</h3>
+      <div class="mode-sub">${m.sub}</div>
+      <div class="mode-blurb">${m.blurb}</div>
+      <div class="mode-meta">
+        <span class="diff">${dots}</span>
+        <span>${m.steps.length} capas</span>
+        <span class="go">Empezar →</span>
+      </div>`;
+    card.addEventListener("click",()=>startMode(key));
+    list.appendChild(card);
+  });
+}
+
+/* ---------------- WRITER ---------------- */
+function startMode(key){
+  // fresh unless restoring same mode
+  if(state.mode!==key){ state={mode:key,step:0,values:{},checks:{}}; }
+  persist();
+  openWriter();
+}
+function openWriter(){
+  const m=MODES[state.mode];
+  $("rail-title").textContent=m.name;
+  $("rail-sub").textContent=m.sub;
+  renderStrata();
+  renderStep();
+  show("view-writer");
+}
+function renderStrata(){
+  const m=MODES[state.mode];
+  const ul=$("strata"); ul.innerHTML="";
+  m.steps.forEach((s,i)=>{
+    const li=document.createElement("li");
+    const filled = (state.values[s.id]||"").trim().length>0;
+    li.className="layer"+(i===state.step?" active":"")+(filled&&i!==state.step?" done":"")+(filled?" done":"");
+    if(i===state.step) li.className="layer active"+(filled?" done":"");
+    li.innerHTML=`<span class="lnum">${String(i+1).padStart(2,"0")}</span><span class="lname">${s.lname}</span><span class="check">✓</span>`;
+    li.addEventListener("click",()=>{ commitCurrent(); state.step=i; renderStrata(); renderStep(); persist(); });
+    ul.appendChild(li);
+  });
+}
+function renderStep(){
+  const m=MODES[state.mode];
+  const s=m.steps[state.step];
+  $("step-eyebrow").textContent=s.eyebrow;
+  $("step-title").textContent=s.title;
+  $("step-guide").textContent=s.guide;
+  const exWrap=$("step-example");
+  if(s.example){
+    exWrap.classList.remove("hidden");
+    $("step-example-label").textContent = s.exampleLabel || "Cómo lo haría Montaigne";
+    $("step-example-text").textContent = s.noQuote ? s.example : "“"+s.example+"”";
+  } else exWrap.classList.add("hidden");
+
+  const exWrap2=$("step-example2");
+  if(s.example2){
+    exWrap2.classList.remove("hidden");
+    $("step-example2-label").textContent = s.example2Label || "Otro ejemplo";
+    $("step-example2-text").textContent = s.noQuote2 ? s.example2 : "“"+s.example2+"”";
+  } else exWrap2.classList.add("hidden");
+
+  const holder=$("input-holder");
+  holder.innerHTML="";
+  let field;
+  if(s.kind==="input"){
+    field=document.createElement("input");
+    field.className="topic";
+    field.type="text";
+  }else{
+    field=document.createElement("textarea");
+  }
+  field.placeholder=s.placeholder||"";
+  field.value=state.values[s.id]||"";
+  field.id="active-field";
+  field.setAttribute("aria-label",s.title);
+  field.addEventListener("input",()=>{
+    state.values[s.id]=field.value;
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{ persist(); flashSaved(); updateStrataDot(); },500);
+  });
+  holder.appendChild(field);
+  field.focus();
+
+  $("btn-prev").disabled = state.step===0;
+  const last = state.step===m.steps.length-1;
+  $("btn-next").textContent = last ? "Ver mi borrador →" : "Siguiente capa →";
+}
+function updateStrataDot(){
+  // lightweight: just re-mark current filled state
+  const items=$("strata").children;
+  const m=MODES[state.mode];
+  m.steps.forEach((s,i)=>{
+    const filled=(state.values[s.id]||"").trim().length>0;
+    const li=items[i]; if(!li) return;
+    li.classList.toggle("done",filled);
+    if(i===state.step) li.classList.add("active");
+  });
+}
+function commitCurrent(){
+  const f=$("active-field");
+  if(f){ state.values[MODES[state.mode].steps[state.step].id]=f.value; }
+}
+function nav(dir){
+  commitCurrent();
+  const m=MODES[state.mode];
+  if(dir>0 && state.step===m.steps.length-1){ persist(); openDraft(); return; }
+  state.step=Math.max(0,Math.min(m.steps.length-1,state.step+dir));
+  renderStrata(); renderStep(); persist();
+}
+
+/* ---------------- ASSEMBLED DRAFT ---------------- */
+function openDraft(){
+  const m=MODES[state.mode];
+  const topicId=m.steps[0].id;
+  const topic=(state.values[topicId]||"").trim();
+  $("draft-kicker").textContent=`${m.name} · ${m.sub}`;
+  $("draft-title").textContent= topic ? capitalize(topic) : "Ensayo sin título";
+
+  const body=$("draft-body"); body.innerHTML="";
+  // first step is the topic/title -> skip from body, start at step 1
+  const parts=m.steps.slice(1);
+  let any=false;
+  parts.forEach(s=>{
+    const txt=(state.values[s.id]||"").trim();
+    const p=document.createElement("p");
+    if(txt){ p.textContent=txt; any=true; }
+    else{ p.className="empty-line"; p.textContent=`[ ${s.lname} — pendiente ]`; }
+    body.appendChild(p);
+  });
+  if(!any){
+    body.innerHTML=`<p class="empty-line">Todavía no has escrito ninguna capa. Vuelve a editar para empezar.</p>`;
+  }
+
+  // checklist
+  const ul=$("checklist-list"); ul.innerHTML="";
+  m.checklist.forEach((c,i)=>{
+    const li=document.createElement("li");
+    const on=!!state.checks[i];
+    li.className=on?"checked":"";
+    li.innerHTML=`<span class="box">${on?"✓":""}</span><span>${c}</span>`;
+    li.addEventListener("click",()=>{
+      state.checks[i]=!state.checks[i];
+      li.classList.toggle("checked");
+      li.querySelector(".box").textContent=state.checks[i]?"✓":"";
+      persist();
+    });
+    ul.appendChild(li);
+  });
+  show("view-draft");
+}
+function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+function buildText(){
+  const m=MODES[state.mode];
+  const topic=(state.values[m.steps[0].id]||"").trim();
+  let out = (topic?capitalize(topic):"Ensayo")+"\n\n";
+  m.steps.slice(1).forEach(s=>{
+    const t=(state.values[s.id]||"").trim();
+    if(t) out+="<!--step:"+s.id+"-->\n"+t+"\n\n";
+  });
+  out+="<!--mode:"+state.mode+"-->\n";
+  out+="—\n"+m.name+" · "+m.sub+" · Escritorio Montaigne";
+  return out.trim();
+}
+
+function importText(text){
+  const modeMatch = text.match(/<!--mode:(\w+)-->/);
+  if(!modeMatch || !MODES[modeMatch[1]]){
+    throw new Error("Este archivo no tiene el formato del taller (falta la marca de modo).");
+  }
+  const modeKey = modeMatch[1];
+  const m = MODES[modeKey];
+  const newValues = {};
+
+  const titleLine = text.match(/^([^\n]*)\n/);
+  if(titleLine && titleLine[1].trim()) newValues[m.steps[0].id] = titleLine[1].trim();
+
+  m.steps.slice(1).forEach(s=>{
+    const re = new RegExp("<!--step:"+s.id+"-->\\n([\\s\\S]*?)(?=<!--|$)");
+    const hit = text.match(re);
+    if(hit && hit[1].trim()) newValues[s.id] = hit[1].trim();
+  });
+
+  state = { mode:modeKey, step:0, values:newValues, checks:{} };
+  persist();
+  openWriter();
+}
+
+/* ---------------- ACTIONS ---------------- */
+$("btn-prev").addEventListener("click",()=>nav(-1));
+$("btn-next").addEventListener("click",()=>nav(1));
+$("btn-exit-writer").addEventListener("click",()=>{ commitCurrent(); persist(); show("view-select"); });
+$("btn-back-edit").addEventListener("click",()=>{ openWriter(); });
+$("btn-new").addEventListener("click",async()=>{
+  await wipe(); state={mode:null,step:0,values:{},checks:{}}; show("view-select");
+});
+$("btn-import").addEventListener("click",()=>$("file-import").click());
+$("file-import").addEventListener("change",e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      importText(ev.target.result);
+    }catch(err){
+      alert("No se pudo importar ese archivo. ¿Es un .md descargado desde este mismo taller?\n\n"+err.message);
+    }
+    e.target.value="";
+  };
+  reader.onerror=()=>alert("No se pudo leer el archivo.");
+  reader.readAsText(file);
+});
+$("btn-copy").addEventListener("click",()=>{
+  const text=buildText();
+  navigator.clipboard?.writeText(text).then(()=>{
+    const b=$("btn-copy"); const old=b.textContent; b.textContent="¡Copiado!";
+    setTimeout(()=>b.textContent=old,1400);
+  }).catch(()=>{
+    const b=$("btn-copy"); b.textContent="No se pudo copiar"; setTimeout(()=>b.textContent="Copiar borrador",1600);
+  });
+});
+$("btn-download").addEventListener("click",()=>{
+  const text=buildText();
+  const topic=(state.values[MODES[state.mode].steps[0].id]||"ensayo").trim().toLowerCase().replace(/[^a-z0-9áéíóúñ ]/gi,"").replace(/\s+/g,"-").slice(0,40)||"ensayo";
+  const blob=new Blob([text],{type:"text/markdown"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=topic+".md";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+
+/* keyboard: Ctrl/Cmd + Enter advances */
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter"&&!$("view-writer").classList.contains("hidden")){
+    e.preventDefault(); nav(1);
+  }
+});
+
+/* ---------------- INIT ---------------- */
+renderModes();
+(async()=>{
+  const had=await restore();
+  if(had && state.mode){
+    // offer to continue by dropping straight into the writer
+    openWriter();
+  }else{
+    show("view-select");
+  }
+})();
+</script>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{/* offline sin SW: la app sigue funcionando igual */});
+  });
+}
+</script>
+</body>
+</html>
